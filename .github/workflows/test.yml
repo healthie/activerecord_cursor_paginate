@@ -1,0 +1,40 @@
+name: Test
+on: [push, pull_request]
+
+jobs:
+  # Run the linter first for rapid feedback if some trivial stylistic issues
+  # slipped through the cracks.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+      - run: bundle exec rubocop
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - ruby-version: 2.7
+            gemfile: activerecord_70.gemfile
+          - ruby-version: 2.7
+            gemfile: activerecord_71.gemfile
+
+          # Test against latest versions just in case.
+          - ruby-version: 3.3
+            gemfile: activerecord_head.gemfile
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+      - name: Run the test suite
+        run: bundle exec rake test

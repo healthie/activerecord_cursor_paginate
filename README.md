@@ -8,6 +8,8 @@ Where a regular limit / offset pagination would jump in results if a record on a
 
 To learn more about cursor pagination, check out the _"How does it work?"_ section below.
 
+[![Build Status](https://github.com/fatkodima/activerecord_cursor_paginate/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/fatkodima/activerecord_cursor_paginate/actions/workflows/test.yml)
+
 ## Requirements
 
 - Ruby 2.7+

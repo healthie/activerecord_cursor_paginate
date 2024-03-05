@@ -65,6 +65,7 @@ GEM
     sqlite3 (1.7.2)
       mini_portile2 (~> 2.8.0)
     sqlite3 (1.7.2-x86_64-darwin)
+    sqlite3 (1.7.2-x86_64-linux)
     timeout (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -73,6 +74,7 @@ GEM
 PLATFORMS
   ruby
   x86_64-darwin-21
+  x86_64-linux
 
 DEPENDENCIES
   activerecord
