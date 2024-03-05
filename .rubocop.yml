@@ -1,0 +1,10 @@
+AllCops:
+  TargetRubyVersion: 2.7
+  NewCops: enable
+  SuggestExtensions: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Gemspec/RequireMFA:
+  Enabled: false
