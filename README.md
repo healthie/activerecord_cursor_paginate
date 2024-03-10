@@ -215,15 +215,15 @@ this cursor, you can request the "n records AFTER the cursor"
 
 As an example, assume we have a table called "posts" with this data:
 
-    | id | author |
-    |----|--------|
-    | 1  | Jane   |
-    | 2  | John   |
-    | 3  | John   |
-    | 4  | Jane   |
-    | 5  | Jane   |
-    | 6  | John   |
-    | 7  | John   |
+| id | author |
+|----|--------|
+| 1  | Jane   |
+| 2  | John   |
+| 3  | John   |
+| 4  | Jane   |
+| 5  | Jane   |
+| 6  | John   |
+| 7  | John   |
 
 Now if we make a basic request without any `before`, `after`, custom `order` column,
 this will just request the first page of this relation.
@@ -237,8 +237,8 @@ Assume that our default page size here is 2 and we would get a query like this:
 
 ```sql
 SELECT *
-FROM "posts"
-ORDER BY "posts"."id" ASC
+FROM posts
+ORDER BY id ASC
 LIMIT 2
 ```
 
@@ -259,9 +259,9 @@ And this will decode the given cursor and issue a query like:
 
 ```sql
 SELECT *
-FROM "posts"
-WHERE "posts"."id" > 2
-ORDER BY "posts"."id" ASC
+FROM posts
+WHERE id > 2
+ORDER BY id ASC
 LIMIT 2
 ```
 
@@ -279,9 +279,9 @@ around to get the last two records that have an ID smaller than the given one:
 
 ```sql
 SELECT *
-FROM "posts"
-WHERE "posts"."id" < 3
-ORDER BY "posts"."id" DESC
+FROM posts
+WHERE id < 3
+ORDER BY id DESC
 LIMIT 2
 ```
 
@@ -301,8 +301,8 @@ This will issue the following SQL query:
 
 ```sql
 SELECT *
-FROM "posts"
-ORDER BY "posts"."author" ASC, "posts"."id" ASC
+FROM posts
+ORDER BY author ASC, id ASC
 LIMIT 2
 ```
 
@@ -336,9 +336,9 @@ We get this SQL query:
 
 ```sql
 SELECT *
-FROM "posts"
-WHERE (author > 'Jane' OR (author = 'Jane') AND ("posts"."id" > 4))
-ORDER BY "posts"."author" ASC, "posts"."id" ASC
+FROM posts
+WHERE (author > 'Jane' OR (author = 'Jane') AND (id > 4))
+ORDER BY author ASC, id ASC
 LIMIT 2
 ```
 
