@@ -31,6 +31,10 @@ ActiveRecord::Schema.define do
     t.integer :user_id
     t.integer :stars
   end
+
+  create_table :no_pk_table, id: false do |t|
+    t.integer :some_column
+  end
 end
 
 class User < ActiveRecord::Base
@@ -41,6 +45,10 @@ class CpkUser < ActiveRecord::Base
 end
 
 class Project < ActiveRecord::Base
+end
+
+class NoPkTable < ActiveRecord::Base
+  self.table_name = :no_pk_table
 end
 
 Minitest::Test.class_eval do

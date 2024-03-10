@@ -115,6 +115,14 @@ paginator = posts.cursor_paginate(order: [:author, :title])
 paginator = posts.cursor_paginate(order: { author: :asc, title: :desc })
 ```
 
+The gem implicitly appends a primary key column to the list of sorting columns. It may be useful
+to disable it for the table with a UUID primary key or when the sorting is done by a combination
+of columns that are already unique.
+
+```ruby
+paginator = UserSettings.cursor_paginate(order: :user_id, append_primary_key: false)
+```
+
 **Important:**
 If your app regularly orders by another column, you might want to add a database index for this.
 Say that your order column is `author` then you'll want to add a compound index on `(author, id)`.

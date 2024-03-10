@@ -34,9 +34,13 @@ module ActiveRecordCursorPaginate
     #   ```sql
     #     CREATE INDEX <index_name> ON <table_name> (<order_fields>..., id)
     #   ```
+    # @param append_primary_key [Boolean] (true). Specifies whether the primary column(s)
+    #   should be implicitly appended to the list of sorting columns. It may be useful
+    #   to disable it for the table with a UUID primary key or when the sorting is done by a
+    #   combination of columns that are already unique.
     # @raise [ArgumentError] If any parameter is not valid
     #
-    def initialize(relation, before: nil, after: nil, limit: nil, order: nil)
+    def initialize(relation, before: nil, after: nil, limit: nil, order: nil, append_primary_key: true)
       unless relation.is_a?(ActiveRecord::Relation)
         raise ArgumentError, "relation is not an ActiveRecord::Relation"
       end
@@ -54,6 +58,7 @@ module ActiveRecordCursorPaginate
       @page_size = limit || config.default_page_size
       @page_size = [@page_size, config.max_page_size].min if config.max_page_size
 
+      @append_primary_key = append_primary_key
       order = normalize_order(order)
       @columns = order.keys
       @directions = order.values
@@ -153,7 +158,13 @@ module ActiveRecordCursorPaginate
 
         result = result.with_indifferent_access
         result.transform_values! { |direction| direction.downcase.to_sym }
-        Array(@primary_key).each { |column| result[column] ||= default_direction }
+
+        if @append_primary_key
+          Array(@primary_key).each { |column| result[column] ||= default_direction }
+        end
+
+        raise ArgumentError, ":order must contain columns to order by" if result.blank?
+
         result
       end
 

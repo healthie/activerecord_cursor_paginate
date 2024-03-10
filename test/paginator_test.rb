@@ -17,6 +17,13 @@ class PaginatorTest < Minitest::Test
     assert_equal("Only one of :before and :after can be provided", error.message)
   end
 
+  def test_raises_when_no_primary_key_and_order_is_empty
+    error = assert_raises(ArgumentError) do
+      NoPkTable.cursor_paginate
+    end
+    assert_equal(":order must contain columns to order by", error.message)
+  end
+
   def test_paginates_by_id_by_default
     p = User.cursor_paginate
     users = p.fetch.records
@@ -73,6 +80,16 @@ class PaginatorTest < Minitest::Test
     p = User.cursor_paginate(limit: 4, order: [:company_id, :id])
     users = p.fetch.records
     assert_equal([[3, 1], [7, 1], [9, 1], [1, 2]], users.pluck(:id, :company_id))
+  end
+
+  def test_does_not_append_id_if_asked
+    p = User.cursor_paginate(limit: 1, order: :company_id, append_primary_key: false)
+
+    records = []
+    p.pages.each do |page|
+      records.concat(page.records)
+    end
+    assert_equal([1, 2, 3, 4], records.map(&:company_id))
   end
 
   def test_paginates_forward_after_cursor
