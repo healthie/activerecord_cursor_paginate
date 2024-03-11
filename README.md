@@ -157,7 +157,7 @@ page = paginator.fetch
 
 #### Order by more complex logic
 
-Sometimes you might not only want to oder by a column ascending or descending, but need more complex logic.
+Sometimes you might not only want to order by a column ascending or descending, but need more complex logic.
 Imagine you would also store the post's `category` on the `posts` table (as a plain string for simplicity's sake).
 And the category could be `pinned`, `announcement`, or `general`.
 Then you might want to show all `pinned` posts first, followed by the `announcement` ones and lastly show the `general` posts.
