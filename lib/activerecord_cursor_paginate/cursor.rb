@@ -48,8 +48,8 @@ module ActiveRecordCursorPaginate
     attr_reader :columns, :values
 
     def initialize(columns:, values:)
-      @columns = Array(columns)
-      @values = Array(values)
+      @columns = Array.wrap(columns)
+      @values = Array.wrap(values)
 
       raise ArgumentError, "Cursor values can not be nil" if @values.any?(nil)
       raise ArgumentError, ":columns and :values have different sizes" if @columns.size != @values.size

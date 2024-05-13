@@ -184,6 +184,15 @@ class PaginatorTest < Minitest::Test
     assert_equal([7, 4, 10], page2.records.pluck(:id))
   end
 
+  def test_paginating_over_time_column_without_primary_key
+    p = User.cursor_paginate(limit: 3, order: { created_at: :asc }, append_primary_key: false)
+    page1 = p.fetch
+    assert_equal([5, 3, 8], page1.records.pluck(:id))
+
+    page2 = p.fetch
+    assert_equal([7, 4, 10], page2.records.pluck(:id))
+  end
+
   def test_paginating_over_all_pages
     p = User.cursor_paginate(limit: 2)
 

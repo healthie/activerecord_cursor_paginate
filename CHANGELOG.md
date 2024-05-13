@@ -1,5 +1,7 @@
 ## master (unreleased)
 
+- Fix iterating using only a timestamp column
+
 - Add the ability to skip implicitly appending a primary key to the list of sorting columns.
 
     It may be useful to disable it for the table with a UUID primary key or when the sorting
