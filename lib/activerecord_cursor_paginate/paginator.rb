@@ -81,7 +81,7 @@ module ActiveRecordCursorPaginate
 
         relation =
           if relation.select_values.empty?
-            relation.select(Arel.star, arel_columns)
+            relation.select(relation.arel_table[Arel.star], arel_columns)
           else
             relation.select(arel_columns)
           end
