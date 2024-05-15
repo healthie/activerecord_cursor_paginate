@@ -1,5 +1,6 @@
 ## master (unreleased)
 
+- Fix `next_cursor`/`previous_cursor` for empty pages
 - Fix iterating using only a timestamp column
 
 - Add the ability to skip implicitly appending a primary key to the list of sorting columns.

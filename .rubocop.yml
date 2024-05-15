@@ -21,6 +21,9 @@ Style/SymbolArray:
 Style/IfUnlessModifier:
   Enabled: false
 
+Style/GuardClause:
+  Enabled: false
+
 Layout/EmptyLinesAroundAccessModifier:
   EnforcedStyle: only_before
 
@@ -52,4 +55,7 @@ Minitest/MultipleAssertions:
   Enabled: false
 
 Minitest/EmptyLineBeforeAssertionMethods:
+  Enabled: false
+
+Minitest/AssertEmptyLiteral:
   Enabled: false
