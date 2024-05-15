@@ -275,4 +275,17 @@ class PaginatorTest < Minitest::Test
     assert page2.has_next?
     assert page2.has_previous?
   end
+
+  def test_empty_page
+    p = User.where("created_at > ?", Time.current).cursor_paginate
+    page = p.fetch
+
+    assert_equal([], page.records)
+    assert_equal(0, page.count)
+    assert_nil page.next_cursor
+    assert_nil page.previous_cursor
+    assert_not page.has_previous?
+    assert_not page.has_next?
+    assert_empty page.cursors
+  end
 end

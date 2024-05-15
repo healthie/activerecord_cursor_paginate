@@ -78,8 +78,10 @@ module ActiveRecordCursorPaginate
 
     private
       def cursor_for_record(record)
-        cursor = Cursor.from_record(record, columns: @order_columns)
-        cursor.encode
+        if record
+          cursor = Cursor.from_record(record, columns: @order_columns)
+          cursor.encode
+        end
       end
   end
 end
