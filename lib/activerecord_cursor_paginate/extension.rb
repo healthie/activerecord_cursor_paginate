@@ -7,7 +7,7 @@ module ActiveRecordCursorPaginate
     # @see ActiveRecordCursorPaginate::Paginator#initialize
     #
     # @example
-    #   paginator = Post.cursor_paginate(limit: 2, after: "Mg==")
+    #   paginator = Post.cursor_paginate(limit: 2, after: "Mg")
     #   page = paginator.fetch
     #
     def cursor_paginate(after: nil, before: nil, limit: nil, order: nil, append_primary_key: true)
