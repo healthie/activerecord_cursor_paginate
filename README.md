@@ -48,11 +48,11 @@ page = paginator.fetch
 page.records # => [#<Post:0x00007fd7071b2ea8 @id=1>, #<Post:0x00007fd7071bb738 @id=2>, ..., #<Post:0x00007fd707238260 @id=10>]
 page.count # => 10
 page.empty? # => false
-page.cursors            # => ["MQ==", "Mg==", ..., "MTA="]
-                                |                     |
-                                |                     |
-page.previous_cursor    # => "MQ=="                   |
-page.next_cursor        # => "MTA=" ------------------|
+page.cursors            # => ["MQ", "Mg", ..., "MTA"]
+                               |                 |
+                               |                 |
+page.previous_cursor    # =>  "MQ"               |
+page.next_cursor        # =>  "MTA" -------------|
 page.has_previous? # => false
 page.has_next? # => true
 ```
@@ -63,24 +63,24 @@ Take a look at the next section _"Ordering"_ to see how you can have an order di
 To then get the next result page, you simply need to pass the last cursor of the returned page item via:
 
 ```ruby
-paginator = posts.cursor_paginate(after: "MTA=")
+paginator = posts.cursor_paginate(after: "MTA")
 ```
 
 This will then fetch the next result page.
 You can also just as easily paginate to previous pages by using `before` instead of `after` and using the first cursor of the current page.
 
 ```ruby
-paginator = posts.cursor_paginate(before: "MQ==")
+paginator = posts.cursor_paginate(before: "MQ")
 ```
 
 By default, this will always return up to 10 results. But you can also specify how many records should be returned via `limit` parameter.
 
 ```ruby
-paginator = posts.cursor_paginate(after: "MTA=", limit: 2)
+paginator = posts.cursor_paginate(after: "MTA", limit: 2)
 ```
 
 ```ruby
-paginator = posts.cursor_paginate(before: "MQ==", limit: 2)
+paginator = posts.cursor_paginate(before: "MQ", limit: 2)
 ```
 
 You can also easily iterate over the whole relation:
@@ -255,11 +255,11 @@ no custom order is defined, each item in the returned collection will have a
 cursor that only encodes the record's ID.
 
 If we want to now request the next page, we can pass in the cursor of record
-#2 which would be `"Mg=="` (can get via `page.cursor`). So now we can request
+#2 which would be `"Mg"` (can get via `page.cursor`). So now we can request
 the next page by calling:
 
 ```ruby
-paginator = relation.cursor_paginate(limit: 2, after: "Mg==")
+paginator = relation.cursor_paginate(limit: 2, after: "Mg")
 page = paginator.fetch
 ```
 
@@ -275,10 +275,10 @@ LIMIT 2
 
 Which would return posts #3 and #4. If we now want to paginate back, we can
 request the posts that came before the first post, whose cursor would be
-`"Mw=="` (can get via `page.previous_cursor`):
+`"Mw"` (can get via `page.previous_cursor`):
 
 ```ruby
-paginator = relation.cursor_paginate(limit: 2, before: "Mw==")
+paginator = relation.cursor_paginate(limit: 2, before: "Mw")
 page = paginator.fetch
 ```
 
@@ -331,12 +331,12 @@ data, the first record being the custom order column followed by the
 record's ID.
 
 Therefore, the cursor of record #4 will encode `['Jane', 4]`, which yields
-this cursor: `"WyJKYW5lIiw0XQ=="`.
+this cursor: `"WyJKYW5lIiw0XQ"`.
 
 If we now want to request the next page via:
 
 ```ruby
-paginator = relation.cursor_paginate(order: :author, limit: 2, after: "WyJKYW5lIiw0XQ==")
+paginator = relation.cursor_paginate(order: :author, limit: 2, after: "WyJKYW5lIiw0XQ")
 page = paginator.fetch
 ```
 

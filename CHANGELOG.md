@@ -1,5 +1,6 @@
 ## master (unreleased)
 
+- Change cursor encoding to url safe base64
 - Fix `next_cursor`/`previous_cursor` for empty pages
 - Fix iterating using only a timestamp column
 

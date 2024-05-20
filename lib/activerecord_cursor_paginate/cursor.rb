@@ -14,7 +14,7 @@ module ActiveRecordCursorPaginate
       end
 
       def decode(cursor_string:, columns:)
-        decoded = JSON.parse(Base64.strict_decode64(cursor_string))
+        decoded = JSON.parse(Base64.urlsafe_decode64(cursor_string))
 
         if (columns.size == 1 && decoded.is_a?(Array)) ||
            (decoded.is_a?(Array) && decoded.size != columns.size)
@@ -64,7 +64,7 @@ module ActiveRecordCursorPaginate
         end
       end
       unencoded_cursor = (serialized_values.size == 1 ? serialized_values.first : serialized_values)
-      Base64.strict_encode64(unencoded_cursor.to_json)
+      Base64.urlsafe_encode64(unencoded_cursor.to_json, padding: false)
     end
 
     TIMESTAMP_PREFIX = "0aIX2_" # something random

@@ -6,12 +6,12 @@ module ActiveRecordCursorPaginate
   #
   # @example Iterating one page at a time
   #     ActiveRecordCursorPaginate::Paginator
-  #       .new(relation, order: :author, limit: 2, after: "WyJKYW5lIiw0XQ==")
+  #       .new(relation, order: :author, limit: 2, after: "WyJKYW5lIiw0XQ")
   #       .fetch
   #
   # @example Iterating over the whole relation
   #     paginator = ActiveRecordCursorPaginate::Paginator
-  #                   .new(relation, order: :author, limit: 2, after: "WyJKYW5lIiw0XQ==")
+  #                   .new(relation, order: :author, limit: 2, after: "WyJKYW5lIiw0XQ")
   #
   #     # Will lazily iterate over the pages.
   #     paginator.pages.each do |page|
