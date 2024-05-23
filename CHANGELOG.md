@@ -1,5 +1,7 @@
 ## master (unreleased)
 
+## 0.2.0 (2024-05-23)
+
 - Fix prefixing selected columns when iterating over joined tables
 - Change cursor encoding to url safe base64
 - Fix `next_cursor`/`previous_cursor` for empty pages
