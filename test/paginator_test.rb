@@ -214,6 +214,12 @@ class PaginatorTest < Minitest::Test
     assert_equal([[2, 6], [3, 2]], page2.records.pluck(:id, :stars))
   end
 
+  def test_ordering_and_joins_correctly_selects_parent_record_attributes
+    p = User.joins(:projects).cursor_paginate(order: [:id, "projects.id"])
+    page = p.fetch
+    assert_equal([1, 1, 2, 2, 3], page.records.pluck(:id))
+  end
+
   def test_ordering_by_expression
     p = User.cursor_paginate(limit: 2, order: Arel.sql("id + 1"))
     page1 = p.fetch

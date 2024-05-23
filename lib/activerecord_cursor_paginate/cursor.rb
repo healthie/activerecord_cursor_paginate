@@ -8,7 +8,6 @@ module ActiveRecordCursorPaginate
   class Cursor
     class << self
       def from_record(record, columns:)
-        columns = columns.map { |column| column.to_s.split(".").last }
         values = columns.map { |column| record[column] }
         new(columns: columns, values: values)
       end
