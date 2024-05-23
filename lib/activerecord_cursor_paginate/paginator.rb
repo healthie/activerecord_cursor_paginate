@@ -77,7 +77,7 @@ module ActiveRecordCursorPaginate
         arel_columns = @columns.map.with_index do |column, i|
           arel_column(column).as("cursor_column_#{i + 1}")
         end
-        cursor_column_names = 1.upto(@columns.size).map { |i| "cursor_column_#{i}" }
+        cursor_column_names = arel_columns.map { |column| column.right.to_s }
 
         relation =
           if relation.select_values.empty?
