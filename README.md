@@ -8,7 +8,7 @@ Where a regular limit / offset pagination would jump in results if a record on a
 
 To learn more about cursor pagination, check out the _"How does it work?"_ section below.
 
-[![Build Status](https://github.com/fatkodima/activerecord_cursor_paginate/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/fatkodima/activerecord_cursor_paginate/actions/workflows/test.yml)
+[![Build Status](https://github.com/healthie/activerecord_cursor_paginate/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/healthie/activerecord_cursor_paginate/actions/workflows/test.yml)
 
 ## Requirements
 
@@ -375,7 +375,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/fatkodima/activerecord_cursor_paginate.
+Bug reports and pull requests are welcome on GitHub at https://github.com/healthie/activerecord_cursor_paginate.
 
 ## License
 

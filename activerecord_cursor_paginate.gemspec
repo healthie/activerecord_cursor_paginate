@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ["fatkodima123@gmail.com"]
 
   spec.summary = "Cursor-based pagination for ActiveRecord."
-  spec.homepage = "https://github.com/fatkodima/activerecord_cursor_paginate"
+  spec.homepage = "https://github.com/healthie/activerecord_cursor_paginate"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.7"
 
