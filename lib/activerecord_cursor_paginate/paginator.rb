@@ -19,6 +19,8 @@ module ActiveRecordCursorPaginate
   #     end
   #
   class Paginator
+    attr_reader :relation, :before, :after, :limit, :order, :append_primary_key
+
     # Create a new instance of the `ActiveRecordCursorPaginate::Paginator`
     #
     # @param relation [ActiveRecord::Relation] Relation that will be paginated.
@@ -45,24 +47,47 @@ module ActiveRecordCursorPaginate
         raise ArgumentError, "relation is not an ActiveRecord::Relation"
       end
 
-      if before.present? && after.present?
+      @relation = relation
+      @primary_key = @relation.primary_key
+      @append_primary_key = append_primary_key
+
+      self.before = before
+      self.after = after
+      self.limit = limit
+      self.order = order
+    end
+
+    def before=(value)
+      if value.present? && after.present?
         raise ArgumentError, "Only one of :before and :after can be provided"
       end
 
-      @relation = relation
-      @primary_key = @relation.primary_key
-      @cursor = before || after
-      @is_forward_pagination = before.blank?
+      @cursor = value || after
+      @is_forward_pagination = value.blank?
+      @before = value
+    end
 
+    def after=(value)
+      if before.present? && value.present?
+        raise ArgumentError, "Only one of :before and :after can be provided"
+      end
+
+      @cursor = before || value
+      @after = value
+    end
+
+    def limit=(value)
       config = ActiveRecordCursorPaginate.config
-      @page_size = limit || config.default_page_size
+      @page_size = value || config.default_page_size
       @page_size = [@page_size, config.max_page_size].min if config.max_page_size
+      @limit = value
+    end
 
-      @append_primary_key = append_primary_key
-      order = normalize_order(order)
+    def order=(value)
+      order = normalize_order(value)
       @columns = order.keys
       @directions = order.values
-      @total_count = nil
+      @order = value
     end
 
     # Get the paginated result.
