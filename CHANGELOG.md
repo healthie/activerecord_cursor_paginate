@@ -1,5 +1,7 @@
 ## master (unreleased)
 
+- Add ability to incrementally configure a paginator
+
 ## 0.2.0 (2024-05-23)
 
 - Fix prefixing selected columns when iterating over joined tables
