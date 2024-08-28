@@ -44,9 +44,16 @@ And then we create our paginator to fetch the first response page:
 
 ```ruby
 paginator = posts.cursor_paginate
+
+# Total number of records to iterate by this paginator
+paginator.total_count # => 145
+
 page = paginator.fetch
 page.records # => [#<Post:0x00007fd7071b2ea8 @id=1>, #<Post:0x00007fd7071bb738 @id=2>, ..., #<Post:0x00007fd707238260 @id=10>]
+
+# Number of records in this page
 page.count # => 10
+
 page.empty? # => false
 page.cursors            # => ["MQ", "Mg", ..., "MTA"]
                                |                 |

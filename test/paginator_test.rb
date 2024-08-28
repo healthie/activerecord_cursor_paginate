@@ -222,6 +222,8 @@ class PaginatorTest < Minitest::Test
 
   def test_ordering_by_expression
     p = User.cursor_paginate(limit: 2, order: Arel.sql("id + 1"))
+    assert_equal User.count, p.total_count
+
     page1 = p.fetch
     assert_equal([1, 2], page1.records.pluck(:id))
 
@@ -265,8 +267,9 @@ class PaginatorTest < Minitest::Test
   def test_returns_page_object
     user1, user2 = User.first(2)
     p = User.cursor_paginate(limit: 2)
-    page1 = p.fetch
+    assert_equal(User.count, p.total_count)
 
+    page1 = p.fetch
     assert_equal([user1, user2], page1.records)
     assert_equal(2, page1.count)
     assert page1.next_cursor
@@ -284,8 +287,9 @@ class PaginatorTest < Minitest::Test
 
   def test_empty_page
     p = User.where("created_at > ?", Time.current).cursor_paginate
-    page = p.fetch
+    assert_equal(0, p.total_count)
 
+    page = p.fetch
     assert_equal([], page.records)
     assert_equal(0, page.count)
     assert_nil page.next_cursor

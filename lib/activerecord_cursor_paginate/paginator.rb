@@ -62,6 +62,7 @@ module ActiveRecordCursorPaginate
       order = normalize_order(order)
       @columns = order.keys
       @directions = order.values
+      @total_count = nil
     end
 
     # Get the paginated result.
@@ -70,32 +71,7 @@ module ActiveRecordCursorPaginate
     # @note Calling this method advances the paginator.
     #
     def fetch
-      relation = @relation
-
-      # Non trivial columns (expressions or joined tables columns).
-      if @columns.any?(/\W/)
-        arel_columns = @columns.map.with_index do |column, i|
-          arel_column(column).as("cursor_column_#{i + 1}")
-        end
-        cursor_column_names = arel_columns.map { |column| column.right.to_s }
-
-        relation =
-          if relation.select_values.empty?
-            relation.select(relation.arel_table[Arel.star], arel_columns)
-          else
-            relation.select(arel_columns)
-          end
-      else
-        cursor_column_names = @columns
-      end
-
-      pagination_directions = @directions.map { |direction| pagination_direction(direction) }
-      relation = relation.reorder(cursor_column_names.zip(pagination_directions).to_h)
-
-      if @cursor
-        decoded_cursor = Cursor.decode(cursor_string: @cursor, columns: @columns)
-        relation = apply_cursor(relation, decoded_cursor)
-      end
+      relation = build_cursor_relation
 
       relation = relation.limit(@page_size + 1)
       records_plus_one = relation.to_a
@@ -139,6 +115,13 @@ module ActiveRecordCursorPaginate
       end
     end
 
+    # Total number of records to iterate by this paginator.
+    # @return [Integer]
+    #
+    def total_count
+      @total_count ||= build_cursor_relation.count(:all)
+    end
+
     private
       def normalize_order(order)
         order ||= {}
@@ -166,6 +149,45 @@ module ActiveRecordCursorPaginate
         raise ArgumentError, ":order must contain columns to order by" if result.blank?
 
         result
+      end
+
+      def build_cursor_relation
+        relation = @relation
+
+        # Non trivial columns (expressions or joined tables columns).
+        if @columns.any?(/\W/)
+          arel_columns = @columns.map.with_index do |column, i|
+            arel_column(column).as("cursor_column_#{i + 1}")
+          end
+          cursor_column_names = arel_columns.map(&:right)
+
+          relation =
+            if relation.select_values.empty?
+              relation.select(relation.arel_table[Arel.star], arel_columns)
+            else
+              relation.select(arel_columns)
+            end
+        else
+          cursor_column_names = @columns
+        end
+
+        pagination_directions = @directions.map { |direction| pagination_direction(direction) }
+        relation = relation.reorder(cursor_column_names.zip(pagination_directions).to_h)
+
+        if @cursor
+          decoded_cursor = Cursor.decode(cursor_string: @cursor, columns: @columns)
+          relation = apply_cursor(relation, decoded_cursor)
+        end
+
+        relation
+      end
+
+      def cursor_column_names
+        if @columns.any?(/\W/)
+          @columns.size.times.map { |i| "cursor_column_#{i + 1}" }
+        else
+          @columns
+        end
       end
 
       def apply_cursor(relation, cursor)
