@@ -26,6 +26,8 @@ jobs:
             gemfile: activerecord_71.gemfile
           - ruby-version: 3.3
             gemfile: activerecord_72.gemfile
+          - ruby-version: 3.3
+            gemfile: activerecord_80.gemfile
 
           # Test against latest versions just in case.
           - ruby-version: 3.3
