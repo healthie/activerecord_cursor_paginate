@@ -1,5 +1,12 @@
 ## master (unreleased)
 
+- Add ability to get the total number of records
+
+    ```ruby
+    paginator = posts.cursor_paginate
+    paginator.total_count # => 145
+    ```
+
 ## 0.2.0 (2024-05-23)
 
 - Fix prefixing selected columns when iterating over joined tables
