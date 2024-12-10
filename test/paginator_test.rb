@@ -36,6 +36,17 @@ class PaginatorTest < Minitest::Test
     assert_equal((4..9).to_a, users.pluck(:id))
   end
 
+  def test_paginating_by_nullable_cursor_columns
+    p = User.cursor_paginate(order: [:name], limit: 2)
+
+    records = []
+    p.pages.each do |page|
+      records.concat(page.records)
+    end
+
+    assert_equal User.order(:name, :id).to_a, records
+  end
+
   def test_uses_default_limit
     ActiveRecordCursorPaginate.config.stub(:default_page_size, 4) do
       p = User.cursor_paginate
@@ -239,14 +250,6 @@ class PaginatorTest < Minitest::Test
     p2 = User.cursor_paginate(limit: 2, before: second_page.cursor, order: Arel.sql("id + 1"))
     page = p2.fetch
     assert_equal([2, 3], page.records.pluck(:id))
-  end
-
-  def test_raises_when_order_column_is_not_selected
-    p = User.select(:company_id).cursor_paginate
-    error = assert_raises(ArgumentError) do
-      p.fetch
-    end
-    assert_equal("Cursor values can not be nil", error.message)
   end
 
   def test_works_with_composite_primary_keys
