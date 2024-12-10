@@ -1,5 +1,6 @@
 ## master (unreleased)
 
+- Allow `nil`s in cursor values
 - Add ability to incrementally configure a paginator
 
 - Add ability to get the total number of records

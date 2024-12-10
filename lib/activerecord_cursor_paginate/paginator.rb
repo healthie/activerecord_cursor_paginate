@@ -219,6 +219,9 @@ module ActiveRecordCursorPaginate
         operators = @directions.map { |direction| pagination_operator(direction) }
         cursor_positions = cursor.columns.zip(cursor.values, operators)
 
+        # Don't take into account NULL cursor values, as NULLS are not comparable.
+        cursor_positions.delete_if { |(_column, value, _operator)| value.nil? }
+
         where_clause = nil
         cursor_positions.reverse_each.with_index do |(column, value, operator), index|
           where_clause =
