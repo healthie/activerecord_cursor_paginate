@@ -32,6 +32,10 @@ ActiveRecord::Schema.define do
     t.integer :stars
   end
 
+  create_table :commits do |t|
+    t.integer :project_id
+  end
+
   create_table :no_pk_table, id: false do |t|
     t.integer :some_column
   end
@@ -45,6 +49,12 @@ class CpkUser < ActiveRecord::Base
 end
 
 class Project < ActiveRecord::Base
+  belongs_to :user
+  has_many :commits
+end
+
+class Commit < ActiveRecord::Base
+  belongs_to :project
 end
 
 class NoPkTable < ActiveRecord::Base

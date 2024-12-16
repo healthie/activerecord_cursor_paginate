@@ -186,7 +186,6 @@ module ActiveRecordCursorPaginate
           arel_columns = @columns.map.with_index do |column, i|
             arel_column(column).as("cursor_column_#{i + 1}")
           end
-          cursor_column_names = arel_columns.map(&:right)
 
           relation =
             if relation.select_values.empty?
@@ -194,12 +193,10 @@ module ActiveRecordCursorPaginate
             else
               relation.select(arel_columns)
             end
-        else
-          cursor_column_names = @columns
         end
 
         pagination_directions = @directions.map { |direction| pagination_direction(direction) }
-        relation = relation.reorder(cursor_column_names.zip(pagination_directions).to_h)
+        relation = relation.reorder(@columns.zip(pagination_directions).to_h)
 
         if cursor
           decoded_cursor = Cursor.decode(cursor_string: cursor, columns: @columns)

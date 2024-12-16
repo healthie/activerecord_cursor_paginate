@@ -264,6 +264,13 @@ class PaginatorTest < Minitest::Test
     assert_equal([[2, 1], [2, 6]], page3.records.pluck(:company_id, :id))
   end
 
+  def test_works_for_relations_with_joins_and_includes
+    relation = Project.joins(:user).left_outer_joins(:commits).includes(:user)
+    p = relation.cursor_paginate(order: { Arel.sql("projects.id") => :asc })
+    page = p.fetch
+    assert_equal(Project.ids.sort, page.records.pluck(:id))
+  end
+
   def test_returns_page_object
     user1, user2 = User.first(2)
     p = User.cursor_paginate(limit: 2)
