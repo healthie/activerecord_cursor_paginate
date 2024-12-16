@@ -6,7 +6,7 @@ module ActiveRecordCursorPaginate
   #
   class Page
     # Records this page contains.
-    # @return [ActiveRecord::Base]
+    # @return [Array<ActiveRecord::Base>]
     #
     attr_reader :records
 

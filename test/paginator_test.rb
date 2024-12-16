@@ -267,7 +267,6 @@ class PaginatorTest < Minitest::Test
   def test_returns_page_object
     user1, user2 = User.first(2)
     p = User.cursor_paginate(limit: 2)
-    assert_equal(User.count, p.total_count)
 
     page1 = p.fetch
     assert_equal([user1, user2], page1.records)
@@ -283,6 +282,8 @@ class PaginatorTest < Minitest::Test
     page2 = p.fetch
     assert page2.has_next?
     assert page2.has_previous?
+
+    assert_equal(User.count, p.total_count)
   end
 
   def test_empty_page
