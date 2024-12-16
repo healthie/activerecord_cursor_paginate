@@ -1,5 +1,6 @@
 ## master (unreleased)
 
+- Fix paginating over relations with joins, includes and custom ordering
 - Add ability to incrementally configure a paginator
 
 - Add ability to get the total number of records
