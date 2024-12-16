@@ -63,6 +63,7 @@ module ActiveRecordCursorPaginate
       end
 
       @cursor = value || after
+      @current_cursor = @cursor
       @is_forward_pagination = value.blank?
       @before = value
     end
@@ -73,6 +74,7 @@ module ActiveRecordCursorPaginate
       end
 
       @cursor = before || value
+      @current_cursor = @cursor
       @after = value
     end
 
@@ -96,7 +98,7 @@ module ActiveRecordCursorPaginate
     # @note Calling this method advances the paginator.
     #
     def fetch
-      relation = build_cursor_relation
+      relation = build_cursor_relation(@current_cursor)
 
       relation = relation.limit(@page_size + 1)
       records_plus_one = relation.to_a
@@ -107,9 +109,9 @@ module ActiveRecordCursorPaginate
 
       if @is_forward_pagination
         has_next_page = has_additional
-        has_previous_page = @cursor.present?
+        has_previous_page = @current_cursor.present?
       else
-        has_next_page = @cursor.present?
+        has_next_page = @current_cursor.present?
         has_previous_page = has_additional
       end
 
@@ -144,7 +146,7 @@ module ActiveRecordCursorPaginate
     # @return [Integer]
     #
     def total_count
-      @total_count ||= build_cursor_relation.count(:all)
+      @total_count ||= build_cursor_relation(@cursor).count(:all)
     end
 
     private
@@ -176,7 +178,7 @@ module ActiveRecordCursorPaginate
         result
       end
 
-      def build_cursor_relation
+      def build_cursor_relation(cursor)
         relation = @relation
 
         # Non trivial columns (expressions or joined tables columns).
@@ -199,8 +201,8 @@ module ActiveRecordCursorPaginate
         pagination_directions = @directions.map { |direction| pagination_direction(direction) }
         relation = relation.reorder(cursor_column_names.zip(pagination_directions).to_h)
 
-        if @cursor
-          decoded_cursor = Cursor.decode(cursor_string: @cursor, columns: @columns)
+        if cursor
+          decoded_cursor = Cursor.decode(cursor_string: cursor, columns: @columns)
           relation = apply_cursor(relation, decoded_cursor)
         end
 
@@ -261,7 +263,7 @@ module ActiveRecordCursorPaginate
       end
 
       def advance_by_page(page)
-        @cursor =
+        @current_cursor =
           if @is_forward_pagination
             page.next_cursor
           else
