@@ -40,9 +40,15 @@ module ActiveRecordCursorPaginate
     #   should be implicitly appended to the list of sorting columns. It may be useful
     #   to disable it for the table with a UUID primary key or when the sorting is done by a
     #   combination of columns that are already unique.
+    # @param nullable_columns [Symbol, String, nil, Array] Columns which are nullable.
+    #   By default, all columns are considered as non-nullable, if not in this list.
+    #   It is not recommended to use this feature, because the complexity of produced SQL
+    #   queries can have a very negative impact on the database performance. It is better
+    #   to paginate using only non-nullable columns.
+    #
     # @raise [ArgumentError] If any parameter is not valid
     #
-    def initialize(relation, before: nil, after: nil, limit: nil, order: nil, append_primary_key: true)
+    def initialize(relation, before: nil, after: nil, limit: nil, order: nil, append_primary_key: true, nullable_columns: nil)
       unless relation.is_a?(ActiveRecord::Relation)
         raise ArgumentError, "relation is not an ActiveRecord::Relation"
       end
@@ -51,10 +57,20 @@ module ActiveRecordCursorPaginate
       @primary_key = @relation.primary_key
       @append_primary_key = append_primary_key
 
+      @cursor = @current_cursor = nil
+      @is_forward_pagination = true
+      @before = @after = nil
+      @page_size = nil
+      @limit = nil
+      @columns = []
+      @directions = []
+      @order = nil
+
       self.before = before
       self.after = after
       self.limit = limit
       self.order = order
+      self.nullable_columns = nullable_columns
     end
 
     def before=(value)
@@ -92,6 +108,21 @@ module ActiveRecordCursorPaginate
       @order = value
     end
 
+    def nullable_columns=(value)
+      value = Array.wrap(value)
+      value = value.map { |column| column.is_a?(Symbol) ? column.to_s : column }
+
+      if (value - @columns).any?
+        raise ArgumentError, ":nullable_columns should include only column names from the :order option"
+      end
+
+      if value.include?(@columns.last)
+        raise ArgumentError, "Last order column can not be nullable"
+      end
+
+      @nullable_columns = value
+    end
+
     # Get the paginated result.
     # @return [ActiveRecordCursorPaginate::Page]
     #
@@ -119,7 +150,8 @@ module ActiveRecordCursorPaginate
         records,
         order_columns: cursor_column_names,
         has_next: has_next_page,
-        has_previous: has_previous_page
+        has_previous: has_previous_page,
+        nullable_columns: @nullable_columns
       )
 
       advance_by_page(page) unless page.empty?
@@ -199,7 +231,7 @@ module ActiveRecordCursorPaginate
         relation = relation.reorder(@columns.zip(pagination_directions).to_h)
 
         if cursor
-          decoded_cursor = Cursor.decode(cursor_string: cursor, columns: @columns)
+          decoded_cursor = Cursor.decode(cursor_string: cursor, columns: @columns, nullable_columns: @nullable_columns)
           relation = apply_cursor(relation, decoded_cursor)
         end
 
@@ -215,19 +247,38 @@ module ActiveRecordCursorPaginate
       end
 
       def apply_cursor(relation, cursor)
-        operators = @directions.map { |direction| pagination_operator(direction) }
-        cursor_positions = cursor.columns.zip(cursor.values, operators)
+        cursor_positions = cursor.columns.zip(cursor.values, @directions)
 
         where_clause = nil
-        cursor_positions.reverse_each.with_index do |(column, value, operator), index|
-          where_clause =
-            if index == 0
-              arel_column(column).public_send(operator, value)
+
+        cursor_positions.reverse_each.with_index do |(column, value, direction), index|
+          previous_where_clause = where_clause
+
+          operator = pagination_operator(direction)
+          arel_column = arel_column(column)
+
+          # The last column can't be nil.
+          if index == 0
+            where_clause = arel_column.public_send(operator, value)
+          elsif value.nil?
+            if nulls_at_end?(direction)
+              # We are at the section with nulls, which is at the end ([x, x, null, null, null])
+              where_clause = arel_column.eq(nil).and(previous_where_clause)
             else
-              arel_column(column).public_send(operator, value).or(
-                arel_column(column).eq(value).and(where_clause)
-              )
+              # We are at the section with nulls, which is at the beginning ([null, null, null, x, x])
+              where_clause = arel_column.not_eq(nil)
+              where_clause = arel_column.eq(nil).and(previous_where_clause).or(where_clause)
             end
+          else
+            where_clause = arel_column.public_send(operator, value).or(
+              arel_column.eq(value).and(previous_where_clause)
+            )
+
+            if nullable_column?(column) && nulls_at_end?(direction)
+              # Since column's value is not null, nulls can only be at the end.
+              where_clause = arel_column.eq(nil).or(where_clause)
+            end
+          end
         end
 
         relation.where(where_clause)
@@ -266,6 +317,21 @@ module ActiveRecordCursorPaginate
           else
             page.previous_cursor
           end
+      end
+
+      def nulls_at_end?(direction)
+        (direction == :asc && !small_nulls?) || (direction == :desc && small_nulls?)
+      end
+
+      def small_nulls?
+        # PostgreSQL considers NULLs larger than any value,
+        # opposite for SQLite and MySQL.
+        db_config = @relation.klass.connection_pool.db_config
+        db_config.adapter !~ /postg/ # postgres and postgis
+      end
+
+      def nullable_column?(column)
+        @nullable_columns.include?(column)
       end
   end
 end

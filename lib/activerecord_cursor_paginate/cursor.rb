@@ -7,12 +7,12 @@ module ActiveRecordCursorPaginate
   # @private
   class Cursor
     class << self
-      def from_record(record, columns:)
+      def from_record(record, columns:, nullable_columns: nil)
         values = columns.map { |column| record[column] }
-        new(columns: columns, values: values)
+        new(columns: columns, values: values, nullable_columns: nullable_columns)
       end
 
-      def decode(cursor_string:, columns:)
+      def decode(cursor_string:, columns:, nullable_columns: nil)
         decoded = JSON.parse(Base64.urlsafe_decode64(cursor_string))
 
         if (columns.size == 1 && decoded.is_a?(Array)) ||
@@ -28,7 +28,7 @@ module ActiveRecordCursorPaginate
             deserialize_time_if_needed(decoded)
           end
 
-        new(columns: columns, values: decoded)
+        new(columns: columns, values: decoded, nullable_columns: nullable_columns)
       rescue ArgumentError, JSON::ParserError # ArgumentError is raised by strict_decode64
         raise InvalidCursorError, "The given cursor `#{cursor_string}` could not be decoded"
       end
@@ -46,11 +46,16 @@ module ActiveRecordCursorPaginate
 
     attr_reader :columns, :values
 
-    def initialize(columns:, values:)
+    def initialize(columns:, values:, nullable_columns: nil)
       @columns = Array.wrap(columns)
       @values = Array.wrap(values)
+      @nullable_columns = Array.wrap(nullable_columns)
 
-      raise ArgumentError, "Cursor values can not be nil" if @values.any?(nil)
+      nil_index = @values.index(nil)
+      if nil_index && !@nullable_columns.include?(@columns[nil_index])
+        raise ArgumentError, "Cursor value is nil for a column that is not in the :nullable_columns list"
+      end
+
       raise ArgumentError, ":columns and :values have different sizes" if @columns.size != @values.size
     end
 
