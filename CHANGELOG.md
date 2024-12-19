@@ -1,5 +1,18 @@
 ## master (unreleased)
 
+- Allow paginating over nullable columns
+
+    Previously, the error was raised when cursor values contained `nil`s. Now, it is possible to paginate
+    over columns containing `nil` values. You need to explicitly configure which columns are nullable,
+    otherwise columns are considered as non-nullable by the gem.
+
+    ```ruby
+    paginator = users.cursor_paginate(order: [:name, :id], nullable_columns: [:name])
+    ```
+
+    Note that it is not recommended to use this feature, because the complexity of produced SQL queries can have
+    a very negative impact on the database performance. It is better to paginate using only non-nullable columns.
+
 - Fix paginating over relations with joins, includes and custom ordering
 - Add ability to incrementally configure a paginator
 
