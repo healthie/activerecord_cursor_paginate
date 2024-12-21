@@ -47,6 +47,17 @@ class PaginatorTest < Minitest::Test
     assert_equal Project.order(:name, :id).to_a, records
   end
 
+  def test_paginating_by_nullable_arel_cursor_column
+    p = Project.cursor_paginate(order: [Arel.sql("name")], nullable_columns: [Arel.sql("name")], limit: 2)
+
+    records = []
+    p.pages.each do |page|
+      records.concat(page.records)
+    end
+
+    assert_equal Project.order(:name, :id).to_a, records
+  end
+
   def test_paginating_by_multiple_nullable_cursor_columns_in_asc_order
     p = Project.cursor_paginate(order: { name: :asc, organization_id: :desc }, nullable_columns: [:name, :organization_id], limit: 2)
 

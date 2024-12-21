@@ -151,7 +151,7 @@ module ActiveRecordCursorPaginate
         order_columns: cursor_column_names,
         has_next: has_next_page,
         has_previous: has_previous_page,
-        nullable_columns: @nullable_columns
+        nullable_columns: nullable_cursor_column_names
       )
 
       advance_by_page(page) unless page.empty?
@@ -231,11 +231,17 @@ module ActiveRecordCursorPaginate
         relation = relation.reorder(@columns.zip(pagination_directions).to_h)
 
         if cursor
-          decoded_cursor = Cursor.decode(cursor_string: cursor, columns: @columns, nullable_columns: @nullable_columns)
+          decoded_cursor = Cursor.decode(cursor_string: cursor, columns: cursor_column_names, nullable_columns: nullable_cursor_column_names)
           relation = apply_cursor(relation, decoded_cursor)
         end
 
         relation
+      end
+
+      def nullable_cursor_column_names
+        @nullable_columns.map do |column|
+          cursor_column_names[@columns.index(column)]
+        end
       end
 
       def cursor_column_names
@@ -247,7 +253,7 @@ module ActiveRecordCursorPaginate
       end
 
       def apply_cursor(relation, cursor)
-        cursor_positions = cursor.columns.zip(cursor.values, @directions)
+        cursor_positions = @columns.zip(cursor.values, @directions)
 
         where_clause = nil
 
