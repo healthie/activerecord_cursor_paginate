@@ -10,11 +10,12 @@ module ActiveRecordCursorPaginate
     #
     attr_reader :records
 
-    def initialize(records, order_columns:, has_previous: false, has_next: false)
+    def initialize(records, order_columns:, has_previous: false, has_next: false, nullable_columns: nil)
       @records = records
       @order_columns = order_columns
       @has_previous = has_previous
       @has_next = has_next
+      @nullable_columns = nullable_columns
     end
 
     # Number of records in this page.
@@ -79,7 +80,7 @@ module ActiveRecordCursorPaginate
     private
       def cursor_for_record(record)
         if record
-          cursor = Cursor.from_record(record, columns: @order_columns)
+          cursor = Cursor.from_record(record, columns: @order_columns, nullable_columns: @nullable_columns)
           cursor.encode
         end
       end

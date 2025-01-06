@@ -36,6 +36,50 @@ class PaginatorTest < Minitest::Test
     assert_equal((4..9).to_a, users.pluck(:id))
   end
 
+  def test_paginating_by_nullable_cursor_column
+    p = Project.cursor_paginate(order: [:name], nullable_columns: [:name], limit: 2)
+
+    records = []
+    p.pages.each do |page|
+      records.concat(page.records)
+    end
+
+    assert_equal Project.order(:name, :id).to_a, records
+  end
+
+  def test_paginating_by_nullable_arel_cursor_column
+    p = Project.cursor_paginate(order: [Arel.sql("name")], nullable_columns: [Arel.sql("name")], limit: 2)
+
+    records = []
+    p.pages.each do |page|
+      records.concat(page.records)
+    end
+
+    assert_equal Project.order(:name, :id).to_a, records
+  end
+
+  def test_paginating_by_multiple_nullable_cursor_columns_in_asc_order
+    p = Project.cursor_paginate(order: { name: :asc, organization_id: :desc }, nullable_columns: [:name, :organization_id], limit: 2)
+
+    records = []
+    p.pages.each do |page|
+      records.concat(page.records)
+    end
+
+    assert_equal Project.order(name: :asc, organization_id: :desc, id: :asc).to_a, records
+  end
+
+  def test_paginating_by_multiple_nullable_cursor_columns_in_desc_order
+    p = Project.cursor_paginate(order: { name: :desc, organization_id: :asc }, nullable_columns: [:name, :organization_id], limit: 2)
+
+    records = []
+    p.pages.each do |page|
+      records.concat(page.records)
+    end
+
+    assert_equal Project.order(name: :desc, organization_id: :asc, id: :asc).to_a, records
+  end
+
   def test_uses_default_limit
     ActiveRecordCursorPaginate.config.stub(:default_page_size, 4) do
       p = User.cursor_paginate
@@ -246,7 +290,14 @@ class PaginatorTest < Minitest::Test
     error = assert_raises(ArgumentError) do
       p.fetch
     end
-    assert_equal("Cursor values can not be nil", error.message)
+    assert_match(/Cursor value is nil/, error.message)
+  end
+
+  def test_raises_when_last_order_column_is_nullable
+    error = assert_raises(ArgumentError) do
+      User.cursor_paginate(order: [:created_at, :company_id], nullable_columns: [:company_id], append_primary_key: false)
+    end
+    assert_match(/Last order column can not be nullable/, error.message)
   end
 
   def test_works_with_composite_primary_keys

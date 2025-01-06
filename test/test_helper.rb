@@ -28,7 +28,9 @@ ActiveRecord::Schema.define do
   end
 
   create_table :projects do |t|
+    t.integer :organization_id
     t.integer :user_id
+    t.string :name
     t.integer :stars
   end
 
@@ -82,10 +84,10 @@ User.insert_all!(users)
 CpkUser.insert_all!(users) if ActiveRecord.gem_version >= Gem::Version.new("7.1")
 
 projects = [
-  { id: 1, user_id: 2, stars: 5 },
-  { id: 2, user_id: 1, stars: 10 },
-  { id: 3, user_id: 1, stars: 9 },
-  { id: 4, user_id: 3, stars: 2 },
-  { id: 5, user_id: 2, stars: 6 }
+  { id: 1, user_id: 2, organization_id: 2, stars: 5, name: "Ruby on Rails" },
+  { id: 2, user_id: 1, organization_id: 1, stars: 10, name: nil },
+  { id: 3, user_id: 1, organization_id: nil, stars: 9, name: nil },
+  { id: 4, user_id: 3, organization_id: nil, stars: 2, name: "PostgreSQL" },
+  { id: 5, user_id: 2, organization_id: 2, stars: 6, name: "Linux" }
 ]
 Project.insert_all!(projects)
