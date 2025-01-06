@@ -1,5 +1,7 @@
 ## master (unreleased)
 
+## 0.3.0 (2025-01-06)
+
 - Allow paginating over nullable columns
 
     Previously, the error was raised when cursor values contained `nil`s. Now, it is possible to paginate
