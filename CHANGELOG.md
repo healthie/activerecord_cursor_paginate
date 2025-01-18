@@ -1,5 +1,11 @@
 ## master (unreleased)
 
+- Add ability to paginate backward from the end of the collection
+
+    ```ruby
+    paginator = users.cursor_paginate(forward_pagination: false)
+    ```
+
 ## 0.3.0 (2025-01-06)
 
 - Allow paginating over nullable columns

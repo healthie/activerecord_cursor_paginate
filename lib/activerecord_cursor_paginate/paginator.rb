@@ -20,6 +20,7 @@ module ActiveRecordCursorPaginate
   #
   class Paginator
     attr_reader :relation, :before, :after, :limit, :order, :append_primary_key
+    attr_accessor :forward_pagination
 
     # Create a new instance of the `ActiveRecordCursorPaginate::Paginator`
     #
@@ -45,10 +46,14 @@ module ActiveRecordCursorPaginate
     #   It is not recommended to use this feature, because the complexity of produced SQL
     #   queries can have a very negative impact on the database performance. It is better
     #   to paginate using only non-nullable columns.
+    # @param forward_pagination [Boolean] Whether this is a forward or backward pagination.
+    #   Optional, defaults to `true` if `:before` is not provided, `false` otherwise.
+    #   Useful when paginating backward from the end of the collection.
     #
     # @raise [ArgumentError] If any parameter is not valid
     #
-    def initialize(relation, before: nil, after: nil, limit: nil, order: nil, append_primary_key: true, nullable_columns: nil)
+    def initialize(relation, before: nil, after: nil, limit: nil, order: nil, append_primary_key: true,
+                   nullable_columns: nil, forward_pagination: before.nil?)
       unless relation.is_a?(ActiveRecord::Relation)
         raise ArgumentError, "relation is not an ActiveRecord::Relation"
       end
@@ -58,7 +63,7 @@ module ActiveRecordCursorPaginate
       @append_primary_key = append_primary_key
 
       @cursor = @current_cursor = nil
-      @is_forward_pagination = true
+      @forward_pagination = forward_pagination
       @before = @after = nil
       @page_size = nil
       @limit = nil
@@ -80,17 +85,18 @@ module ActiveRecordCursorPaginate
 
       @cursor = value || after
       @current_cursor = @cursor
-      @is_forward_pagination = value.blank?
+      @forward_pagination = false if value
       @before = value
     end
 
     def after=(value)
-      if before.present? && value.present?
+      if value.present? && before.present?
         raise ArgumentError, "Only one of :before and :after can be provided"
       end
 
-      @cursor = before || value
+      @cursor = value || before
       @current_cursor = @cursor
+      @forward_pagination = true if value
       @after = value
     end
 
@@ -136,9 +142,9 @@ module ActiveRecordCursorPaginate
       has_additional = records_plus_one.size > @page_size
 
       records = records_plus_one.take(@page_size)
-      records.reverse! unless @is_forward_pagination
+      records.reverse! unless @forward_pagination
 
-      if @is_forward_pagination
+      if @forward_pagination
         has_next_page = has_additional
         has_previous_page = @current_cursor.present?
       else
@@ -301,7 +307,7 @@ module ActiveRecordCursorPaginate
       end
 
       def pagination_direction(direction)
-        if @is_forward_pagination
+        if @forward_pagination
           direction
         else
           direction == :asc ? :desc : :asc
@@ -309,7 +315,7 @@ module ActiveRecordCursorPaginate
       end
 
       def pagination_operator(direction)
-        if @is_forward_pagination
+        if @forward_pagination
           direction == :asc ? :gt : :lt
         else
           direction == :asc ? :lt : :gt
@@ -318,7 +324,7 @@ module ActiveRecordCursorPaginate
 
       def advance_by_page(page)
         @current_cursor =
-          if @is_forward_pagination
+          if @forward_pagination
             page.next_cursor
           else
             page.previous_cursor
