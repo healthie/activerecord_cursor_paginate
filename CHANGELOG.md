@@ -1,5 +1,7 @@
 ## master (unreleased)
 
+## 0.4.0 (2025-03-10)
+
 - Add ability to paginate backward from the end of the collection
 
     ```ruby
