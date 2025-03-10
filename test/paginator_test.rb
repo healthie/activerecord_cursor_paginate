@@ -80,6 +80,16 @@ class PaginatorTest < Minitest::Test
     assert_equal Project.order(name: :desc, organization_id: :asc, id: :asc).to_a, records
   end
 
+  def test_paginating_backward_from_the_end
+    p = User.cursor_paginate(limit: 3, forward_pagination: false)
+
+    ids = p.pages.map do |page|
+      page.records.pluck(:id)
+    end
+
+    assert_equal [[8, 9, 10], [5, 6, 7], [2, 3, 4], [1]], ids
+  end
+
   def test_uses_default_limit
     ActiveRecordCursorPaginate.config.stub(:default_page_size, 4) do
       p = User.cursor_paginate

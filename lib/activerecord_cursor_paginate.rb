@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# https://github.com/rails/rails/issues/54260
+require "logger"
+
 require "active_record"
 
 require_relative "activerecord_cursor_paginate/version"
