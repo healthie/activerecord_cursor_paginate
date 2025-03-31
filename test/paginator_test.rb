@@ -93,6 +93,7 @@ class PaginatorTest < Minitest::Test
   def test_uses_default_limit
     ActiveRecordCursorPaginate.config.stub(:default_page_size, 4) do
       p = User.cursor_paginate
+      assert_equal 4, p.limit
       users = p.fetch.records
       assert_equal([1, 2, 3, 4], users.pluck(:id))
     end
@@ -100,6 +101,7 @@ class PaginatorTest < Minitest::Test
 
   def test_custom_limit
     p = User.cursor_paginate(limit: 3)
+    assert_equal 3, p.limit
     users = p.fetch.records
     assert_equal([1, 2, 3], users.pluck(:id))
   end

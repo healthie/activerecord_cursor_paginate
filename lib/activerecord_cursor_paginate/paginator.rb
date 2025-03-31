@@ -104,7 +104,7 @@ module ActiveRecordCursorPaginate
       config = ActiveRecordCursorPaginate.config
       @page_size = value || config.default_page_size
       @page_size = [@page_size, config.max_page_size].min if config.max_page_size
-      @limit = value
+      @limit = @page_size
     end
 
     def order=(value)
