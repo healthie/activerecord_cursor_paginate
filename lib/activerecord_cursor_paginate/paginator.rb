@@ -184,7 +184,7 @@ module ActiveRecordCursorPaginate
     # @return [Integer]
     #
     def total_count
-      @total_count ||= build_cursor_relation(@cursor).count(:all)
+      @total_count ||= @relation.count(:all)
     end
 
     private

@@ -149,10 +149,16 @@ class PaginatorTest < Minitest::Test
   end
 
   def test_paginates_forward_after_cursor
+    total_count = User.count
+
     p1 = User.cursor_paginate(limit: 3)
+    assert_equal total_count, p1.total_count
+
     page1 = p1.fetch
 
     p2 = User.cursor_paginate(after: page1.cursor, limit: 4)
+    assert_equal total_count, p2.total_count
+
     page2 = p2.fetch
     assert_equal([4, 5, 6, 7], page2.records.pluck(:id))
   end
