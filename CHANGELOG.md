@@ -1,5 +1,7 @@
 ## master (unreleased)
 
+## 0.4.1 (2025-04-08)
+
 - Fix `Paginator#total_count` to not change when paginating
 - Fix `Paginator#limit` to return default page size by default
 
